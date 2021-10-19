@@ -1,6 +1,8 @@
 package com.example.demo.entities;
 
 
+import java.util.List;
+
 import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
 
@@ -17,5 +19,4 @@ public class EnseignantChercheur extends Membre {
 	private static final long serialVersionUID = 1L;
 	private String grade;
 	private String etablissement;
-
 }
