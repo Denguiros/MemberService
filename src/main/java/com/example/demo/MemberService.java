@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
 
 import com.example.demo.dao.EnseignantChercheurRepository;
 import com.example.demo.dao.MembreRepository;
@@ -14,6 +15,7 @@ import com.example.demo.entities.Etudiant;
 import com.example.demo.service.IMemberService;
 
 @SpringBootApplication
+@EnableDiscoveryClient
 public class MemberService implements CommandLineRunner {
 
 	@Autowired
@@ -28,7 +30,7 @@ public class MemberService implements CommandLineRunner {
 
 	@Override
 	public void run(String... args) throws Exception {
-		EnseignantChercheur ens1 = new EnseignantChercheur("Docteur","Enis");
+		/*EnseignantChercheur ens1 = new EnseignantChercheur("Docteur","Enis");
 		EnseignantChercheur ens2 = new EnseignantChercheur("Nouveau","Enis");
 		Etudiant e1 = new Etudiant();
 		e1.setNom("Fehmi");
@@ -44,7 +46,7 @@ public class MemberService implements CommandLineRunner {
 		System.out.println("Les etudiants de l'encadrant 1 =>");
 		for (Etudiant etudiant : etudiantsDeEns1) {
 			System.out.println(etudiant.getNom());
-		}
+		}*/
 	}
 	
 
