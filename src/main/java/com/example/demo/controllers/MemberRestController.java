@@ -14,6 +14,9 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.example.demo.beans.EvenementBean;
+import com.example.demo.beans.OutilBean;
+import com.example.demo.beans.PublicationBean;
 import com.example.demo.entities.EnseignantChercheur;
 import com.example.demo.entities.Etudiant;
 import com.example.demo.entities.Membre;
@@ -31,7 +34,14 @@ public class MemberRestController {
 
 	@GetMapping(value = "/membre/{id}")
 	public Membre findOneMemberById(@PathVariable Long id) {
-		return memberService.findMember(id);
+		List<PublicationBean> listeOfPublications = memberService.findPublicationsByAuteur(id);
+		List<EvenementBean> listOfEvents = memberService.findEvenementByParticipant(id);
+		List<OutilBean> listOfOutils = memberService.findOutilByMembre(id);
+		Membre member = memberService.findMember(id);
+		member.setPublications(listeOfPublications);
+		member.setEvenements(listOfEvents);
+		member.setOutils(listOfOutils);
+		return member;
 	}
 
 	@GetMapping(value = "/membre/search/cin")

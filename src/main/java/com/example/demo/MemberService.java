@@ -7,15 +7,19 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
+import org.springframework.cloud.openfeign.EnableFeignClients;
 
+import com.example.demo.beans.PublicationBean;
 import com.example.demo.dao.EnseignantChercheurRepository;
 import com.example.demo.dao.MembreRepository;
 import com.example.demo.entities.EnseignantChercheur;
 import com.example.demo.entities.Etudiant;
+import com.example.demo.proxies.PublicationProxyService;
 import com.example.demo.service.IMemberService;
 
 @SpringBootApplication
 @EnableDiscoveryClient
+@EnableFeignClients
 public class MemberService implements CommandLineRunner {
 
 	@Autowired
@@ -24,10 +28,12 @@ public class MemberService implements CommandLineRunner {
 	EnseignantChercheurRepository enseignantChercheurRepository;
 	@Autowired
 	IMemberService memberService;
+	@Autowired
+	PublicationProxyService publicationProxy;
 	public static void main(String[] args) {
 		SpringApplication.run(MemberService.class, args);
 	}
-
+	
 	@Override
 	public void run(String... args) throws Exception {
 		/*EnseignantChercheur ens1 = new EnseignantChercheur("Docteur","Enis");
@@ -47,6 +53,9 @@ public class MemberService implements CommandLineRunner {
 		for (Etudiant etudiant : etudiantsDeEns1) {
 			System.out.println(etudiant.getNom());
 		}*/
+		PublicationBean publication = publicationProxy.findPublicationById(14L);
+		System.out.println(publication);
+		memberService.affecterMembreToOutil(1L, 1L);
 	}
 	
 
