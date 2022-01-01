@@ -1,8 +1,19 @@
 package com.example.demo.controllers;
 
+import java.io.File;
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 
+import javax.servlet.http.HttpServletRequest;
+
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.FileSystemResource;
+import org.springframework.http.MediaType;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -12,7 +23,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.example.demo.beans.EvenementBean;
 import com.example.demo.beans.OutilBean;
@@ -21,15 +34,33 @@ import com.example.demo.entities.EnseignantChercheur;
 import com.example.demo.entities.Etudiant;
 import com.example.demo.entities.Membre;
 import com.example.demo.service.IMemberService;
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.introspect.VisibilityChecker;
 
 @RestController
+@CrossOrigin(origins = "http://localhost:4200", methods = { RequestMethod.POST, RequestMethod.GET, RequestMethod.DELETE,
+		RequestMethod.PUT }, allowedHeaders = "*")
 public class MemberRestController {
 	@Autowired
 	IMemberService memberService;
+	@Autowired
+	private HttpServletRequest request;
 
 	@RequestMapping(value = "/membres", method = RequestMethod.GET)
 	public List<Membre> findMembres() {
-		return memberService.findAll();
+		List<Membre> membres = memberService.findAll();
+		membres.forEach(member -> {
+			List<PublicationBean> listeOfPublications = memberService.findPublicationsByAuteur(member.getId());
+			List<EvenementBean> listOfEvents = memberService.findEvenementByParticipant(member.getId());
+			List<OutilBean> listOfOutils = memberService.findOutilByMembre(member.getId());
+			member.setPublications(listeOfPublications);
+			member.setEvenements(listOfEvents);
+			member.setOutils(listOfOutils);
+		});
+		return membres;
 	}
 
 	@GetMapping(value = "/membre/{id}")
@@ -69,10 +100,69 @@ public class MemberRestController {
 		memberService.deleteMember(id);
 	}
 
-	@PutMapping(value = "/membres/etudiant/{id}")
-	public Membre updatemembre(@PathVariable Long id, @RequestBody Etudiant p) {
-		p.setId(id);
-		return memberService.updateMember(p);
+	@GetMapping(value = "/get-image")
+	@ResponseBody
+	public FileSystemResource getFile(@RequestParam(name = "path") String path) {
+		String decodedPath = URLDecoder.decode(path);
+		System.out.println(decodedPath);
+		File f = new File(decodedPath);
+		return new FileSystemResource(f.getAbsolutePath());
+	}
+
+	@PutMapping(value = "/membres/etudiant/{id}", consumes = { MediaType.MULTIPART_FORM_DATA_VALUE })
+	public Membre updatemembre(@PathVariable Long id, @RequestParam(name = "member") String etudiant,
+			@RequestParam(name = "cv", required = false) MultipartFile cv,
+			@RequestParam(name = "photo", required = false) MultipartFile photo) {
+
+		ObjectMapper objectMapper = new ObjectMapper();
+		objectMapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
+		objectMapper.setVisibility(
+				VisibilityChecker.Std.defaultInstance().withFieldVisibility(JsonAutoDetect.Visibility.ANY));
+		Membre m = null;
+		try {
+			m = objectMapper.readValue(etudiant, Etudiant.class);
+			if (cv != null) {
+				m.setCv(writeFile(m.getNom() + m.getPrenom() + "/cv", cv));
+			}
+			if (photo != null) {
+				String path = writeFile(m.getNom() + m.getPrenom() + "/photo", photo);
+				String encodedPath = "";
+				try {
+					encodedPath = URLEncoder.encode(path, StandardCharsets.UTF_8.toString());
+				} catch (UnsupportedEncodingException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				m.setPhoto(encodedPath);
+			}
+			m.setId(id);
+		} catch (JsonProcessingException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return memberService.updateMember(m);
+	}
+
+	public String writeFile(String name, MultipartFile file) {
+
+		String uploadsDir = "uploads/" + name + "/";
+		File f = new File(uploadsDir);
+		String absolutePath = f.getAbsolutePath();
+		if (!f.exists()) {
+			System.out.println("Creating new directory");
+			f.mkdirs();
+		}
+		String orgName = file.getOriginalFilename();
+		String filePath = absolutePath + "/" + orgName;
+		File dest = new File(filePath);
+		try {
+			file.transferTo(dest);
+		} catch (IllegalStateException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		return uploadsDir + "/" + orgName;
 	}
 
 	@PutMapping(value = "/membres/enseignant/{id}")
