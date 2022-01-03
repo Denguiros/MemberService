@@ -112,6 +112,12 @@ public class MemberImpl implements IMemberService {
 		e.setEncadreur(ens);
 		return memberRepository.saveAndFlush(e);
 	}
+	@Override
+	public void desaffecterEtudiantDeEnseignant(Long idEtd) {
+		Etudiant e = etudiantRepository.findById(idEtd).get();
+		e.setEncadreur(null);
+		memberRepository.saveAndFlush(e);
+	}
 
 	@Override
 	public List<Etudiant> getEtudiantsDeEnseignant(EnseignantChercheur enseignantChercheur) {
@@ -180,5 +186,15 @@ public class MemberImpl implements IMemberService {
 			outils.add(outilProxyService.findOutilById(s.getId().getOutilId()));
 		});
 		return outils;
+	}
+
+	@Override
+	public void updateMemberType(String type,Long id) {
+		memberRepository.updateType(type, id);
+	}
+
+	@Override
+	public List<Etudiant> getEtudiantsNonEncadrees() {
+		return memberRepository.getEtudiantsNonEncadrees();
 	}
 }

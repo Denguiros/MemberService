@@ -51,6 +51,7 @@ public class MemberRestController {
 
 	@RequestMapping(value = "/membres", method = RequestMethod.GET)
 	public List<Membre> findMembres() {
+
 		List<Membre> membres = memberService.findAll();
 		membres.forEach(member -> {
 			List<PublicationBean> listeOfPublications = memberService.findPublicationsByAuteur(member.getId());
@@ -62,16 +63,38 @@ public class MemberRestController {
 		});
 		return membres;
 	}
-
+	@GetMapping(value = "/enseignant/{id}/etudiants")
+	public List<Etudiant> getEtudiantsDeEnseignant(@PathVariable Long id)
+	{
+		return memberService.getEtudiantsDeEnseignant((EnseignantChercheur) memberService.findMember(id));
+	}
+	@GetMapping(value = "/etudiantsNonEncadrees")
+	public List<Etudiant> getEtudiantsNonEncadrees()
+	{
+		return memberService.getEtudiantsNonEncadrees();
+	}
+	@PostMapping(value="etudiant/{idEtd}/affecter/{idEns}")
+	public void affecterEtudiantAEnseignant(@PathVariable Long idEtd,@PathVariable Long idEns)
+	{
+		memberService.affecterEtudiantAEnseignant(idEtd, idEns);
+	}
+	@DeleteMapping(value="/etudiant/{id}/desaffecter")
+	public void desaffecterEtudiantDeEnseignant(@PathVariable Long id)
+	{
+		memberService.desaffecterEtudiantDeEnseignant(id);
+	}
+	
 	@GetMapping(value = "/membre/{id}")
 	public Membre findOneMemberById(@PathVariable Long id) {
 		List<PublicationBean> listeOfPublications = memberService.findPublicationsByAuteur(id);
 		List<EvenementBean> listOfEvents = memberService.findEvenementByParticipant(id);
 		List<OutilBean> listOfOutils = memberService.findOutilByMembre(id);
 		Membre member = memberService.findMember(id);
-		member.setPublications(listeOfPublications);
-		member.setEvenements(listOfEvents);
-		member.setOutils(listOfOutils);
+		if (member != null) {
+			member.setPublications(listeOfPublications);
+			member.setEvenements(listOfEvents);
+			member.setOutils(listOfOutils);
+		}
 		return member;
 	}
 
@@ -100,7 +123,7 @@ public class MemberRestController {
 		memberService.deleteMember(id);
 	}
 
-	@GetMapping(value = "/get-image")
+	@GetMapping(value = "/get-file")
 	@ResponseBody
 	public FileSystemResource getFile(@RequestParam(name = "path") String path) {
 		String decodedPath = URLDecoder.decode(path);
@@ -108,12 +131,16 @@ public class MemberRestController {
 		File f = new File(decodedPath);
 		return new FileSystemResource(f.getAbsolutePath());
 	}
-
+	@PutMapping(value = "/membres/{id}/type")
+	public void updateType(@PathVariable Long id, @RequestParam(name = "type") String type)
+	{
+		memberService.updateMemberType(type, id);
+	}
 	@PutMapping(value = "/membres/etudiant/{id}", consumes = { MediaType.MULTIPART_FORM_DATA_VALUE })
-	public Membre updatemembre(@PathVariable Long id, @RequestParam(name = "member") String etudiant,
+	public Membre updateMembre(@PathVariable Long id, @RequestParam(name = "member") String etudiant,
 			@RequestParam(name = "cv", required = false) MultipartFile cv,
 			@RequestParam(name = "photo", required = false) MultipartFile photo) {
-
+		Membre member = memberService.findMember(id);
 		ObjectMapper objectMapper = new ObjectMapper();
 		objectMapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
 		objectMapper.setVisibility(
@@ -122,7 +149,14 @@ public class MemberRestController {
 		try {
 			m = objectMapper.readValue(etudiant, Etudiant.class);
 			if (cv != null) {
-				m.setCv(writeFile(m.getNom() + m.getPrenom() + "/cv", cv));
+				String path = writeFile(m.getNom() + m.getPrenom() + "/cv", cv);
+				String encodedPath = "";
+				try {
+					encodedPath = URLEncoder.encode(path, StandardCharsets.UTF_8.toString());
+				} catch (UnsupportedEncodingException e) {
+					e.printStackTrace();
+				}
+				m.setCv(encodedPath);
 			}
 			if (photo != null) {
 				String path = writeFile(m.getNom() + m.getPrenom() + "/photo", photo);
@@ -130,14 +164,19 @@ public class MemberRestController {
 				try {
 					encodedPath = URLEncoder.encode(path, StandardCharsets.UTF_8.toString());
 				} catch (UnsupportedEncodingException e) {
-					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
 				m.setPhoto(encodedPath);
 			}
+			if (m.getCv() == "" || m.getCv() == null) {
+				m.setCv(member.getCv());
+			}
+			
+			if (m.getPhoto() == "" || m.getPhoto() == null) {
+				m.setPhoto(member.getPhoto());
+			}
 			m.setId(id);
 		} catch (JsonProcessingException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		return memberService.updateMember(m);
@@ -165,9 +204,48 @@ public class MemberRestController {
 		return uploadsDir + "/" + orgName;
 	}
 
-	@PutMapping(value = "/membres/enseignant/{id}")
-	public Membre updateMembre(@PathVariable Long id, @RequestBody EnseignantChercheur p) {
-		p.setId(id);
-		return memberService.updateMember(p);
+	@PutMapping(value = "/membres/enseignant/{id}", consumes = { MediaType.MULTIPART_FORM_DATA_VALUE })
+	public Membre updateEnseignant(@PathVariable Long id, @RequestParam(name = "member") String enseignant,
+			@RequestParam(name = "cv", required = false) MultipartFile cv,
+			@RequestParam(name = "photo", required = false) MultipartFile photo) {
+		Membre member = memberService.findMember(id);
+		ObjectMapper objectMapper = new ObjectMapper();
+		objectMapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
+		objectMapper.setVisibility(
+				VisibilityChecker.Std.defaultInstance().withFieldVisibility(JsonAutoDetect.Visibility.ANY));
+		Membre m = null;
+		try {
+			m = objectMapper.readValue(enseignant, EnseignantChercheur.class);
+			if (cv != null) {
+				String path = writeFile(m.getNom() + m.getPrenom() + "/cv", cv);
+				String encodedPath = "";
+				try {
+					encodedPath = URLEncoder.encode(path, StandardCharsets.UTF_8.toString());
+				} catch (UnsupportedEncodingException e) {
+					e.printStackTrace();
+				}
+				m.setCv(encodedPath);
+			}
+			if (photo != null) {
+				String path = writeFile(m.getNom() + m.getPrenom() + "/photo", photo);
+				String encodedPath = "";
+				try {
+					encodedPath = URLEncoder.encode(path, StandardCharsets.UTF_8.toString());
+				} catch (UnsupportedEncodingException e) {
+					e.printStackTrace();
+				}
+				m.setPhoto(encodedPath);
+			}
+			if (m.getCv() == "" || m.getCv() == null) {
+				m.setCv(member.getCv());
+			}
+			if (m.getPhoto() == "" || m.getPhoto() == null) {
+				m.setPhoto(member.getPhoto());
+			}
+			m.setId(id);
+		} catch (JsonProcessingException e) {
+			e.printStackTrace();
+		}
+		return memberService.updateMember(m);
 	}
 }

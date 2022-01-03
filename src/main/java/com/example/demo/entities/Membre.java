@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.util.Collection;
 import java.util.Date;
 
+import javax.persistence.Column;
 import javax.persistence.DiscriminatorColumn;
 import javax.persistence.DiscriminatorType;
 import javax.persistence.Entity;
@@ -36,6 +37,9 @@ public abstract class Membre implements Serializable {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private long id;
+	private boolean isAdmin;
+	@Column(name="type_mbr", insertable = false, updatable = false)
+	private String type;
 	private String cin;
 	private String nom;
 	private String prenom;

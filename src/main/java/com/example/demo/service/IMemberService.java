@@ -16,7 +16,7 @@ public interface IMemberService {
 	void deleteMember(Long id);
 
 	Membre updateMember(Membre p);
-
+	void updateMemberType(String type,Long id);
 	Membre findMember(Long id);
 
 	List<Membre> findAll();
@@ -44,4 +44,8 @@ public interface IMemberService {
 	List<EvenementBean> findEvenementByParticipant (Long idParticipant);
 	void affecterMembreToOutil(Long idMembre, Long idOutil);
 	List<OutilBean> findOutilByMembre (Long idMembre);
+
+	List<Etudiant> getEtudiantsNonEncadrees();
+
+	void desaffecterEtudiantDeEnseignant(Long idEtd);
 }
