@@ -48,4 +48,10 @@ public interface IMemberService {
 	List<Etudiant> getEtudiantsNonEncadrees();
 
 	void desaffecterEtudiantDeEnseignant(Long idEtd);
+
+	void desaffecterAuteurFromPublication(Long id, Long pubId);
+
+	void desaffecterParticipantFromEvenement(Long id, Long eveId);
+
+	void desaffecterMembreFromOutil(Long id, Long ouId);
 }

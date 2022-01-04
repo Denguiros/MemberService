@@ -117,6 +117,30 @@ public class MemberRestController {
 	public Membre addMembre(@RequestBody Etudiant e) {
 		return memberService.addMember(e);
 	}
+	@PostMapping(value = "/membre/{id}/publication/{pubId}")
+	public void affecterAuteurToPublication(@PathVariable Long id,@PathVariable Long pubId) {
+		memberService.affecterAuteurToPublication(id, pubId);
+	}
+	@PostMapping(value = "/membre/{id}/publication/{pubId}/desaffecter")
+	public void desaffecterAuteurToPublication(@PathVariable Long id,@PathVariable Long pubId) {
+		memberService.desaffecterAuteurFromPublication(id, pubId);
+	}
+	@PostMapping(value = "/membre/{id}/evenement/{eveId}")
+	public void affecterParticipantToEvenement(@PathVariable Long id,@PathVariable Long eveId) {
+		memberService.affecterParticipantToEvenement(id, eveId);
+	}
+	@PostMapping(value = "/membre/{id}/evenement/{eveId}/desaffecter")
+	public void desaffecterParticipantToEvenement(@PathVariable Long id,@PathVariable Long eveId) {
+		memberService.desaffecterParticipantFromEvenement(id, eveId);
+	}
+	@PostMapping(value = "/membre/{id}/outil/{ouId}")
+	public void affecterMembreToOutil(@PathVariable Long id,@PathVariable Long ouId) {
+		memberService.affecterMembreToOutil(id, ouId);
+	}
+	@PostMapping(value = "/membre/{id}/outil/{ouId}/desaffecter")
+	public void desaffecterMembreFromOutil(@PathVariable Long id,@PathVariable Long ouId) {
+		memberService.desaffecterMembreFromOutil(id, ouId);
+	}
 
 	@DeleteMapping(value = "/membres/{id}")
 	public void deleteMembre(@PathVariable Long id) {

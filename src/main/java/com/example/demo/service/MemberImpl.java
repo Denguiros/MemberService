@@ -197,4 +197,19 @@ public class MemberImpl implements IMemberService {
 	public List<Etudiant> getEtudiantsNonEncadrees() {
 		return memberRepository.getEtudiantsNonEncadrees();
 	}
+
+	@Override
+	public void desaffecterAuteurFromPublication(Long id, Long pubId) {
+		memberPublicationRepository.desaffecterAuteurFromPublication(id,pubId);
+	}
+
+	@Override
+	public void desaffecterParticipantFromEvenement(Long id, Long eveId) {
+		memberEvenementRepository.desaffecterParticipantFromEvenement(id,eveId);
+	}
+
+	@Override
+	public void desaffecterMembreFromOutil(Long id, Long ouId) {
+		memberOutilRepository.desaffecterMembreFromOutil(id, ouId);
+	}
 }
