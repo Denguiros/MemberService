@@ -54,4 +54,6 @@ public interface IMemberService {
 	void desaffecterParticipantFromEvenement(Long id, Long eveId);
 
 	void desaffecterMembreFromOutil(Long id, Long ouId);
+
+	List<Membre> getAllEvenetParticipants(Long id);
 }

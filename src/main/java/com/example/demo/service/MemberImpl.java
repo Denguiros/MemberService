@@ -212,4 +212,15 @@ public class MemberImpl implements IMemberService {
 	public void desaffecterMembreFromOutil(Long id, Long ouId) {
 		memberOutilRepository.desaffecterMembreFromOutil(id, ouId);
 	}
+
+	@Override
+	public List<Membre> getAllEvenetParticipants(Long id) {
+		List<MembreEvenement> idEvents = memberEvenementRepository.findParticipantsOfEvenement(id);
+		List<Membre> membres = new ArrayList<Membre>();
+		idEvents.forEach(s -> {
+			System.out.println(s);
+			membres.add(memberRepository.findById(s.getId().getParticipantId()).get());
+		});
+		return membres;
+	}
 }

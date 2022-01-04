@@ -105,9 +105,22 @@ public class MemberRestController {
 
 	@GetMapping(value = "/membre/search/email")
 	public Membre findOneMemberByEmail(@RequestParam String email) {
-		return memberService.findByEmail(email);
+		Membre member = memberService.findByEmail(email);
+		if (member != null) {
+			List<PublicationBean> listeOfPublications = memberService.findPublicationsByAuteur(member.getId());
+			List<EvenementBean> listOfEvents = memberService.findEvenementByParticipant(member.getId());
+			List<OutilBean> listOfOutils = memberService.findOutilByMembre(member.getId());
+			member.setPublications(listeOfPublications);
+			member.setEvenements(listOfEvents);
+			member.setOutils(listOfOutils);
+		}
+		return member;
 	}
-
+	@GetMapping(value="/eventParticipants/{id}")
+	public List<Membre> getAllEventParticipants(@PathVariable Long id)
+	{
+		return memberService.getAllEvenetParticipants(id);
+	}
 	@PostMapping(value = "/membres/enseignant")
 	public Membre addMembre(@RequestBody EnseignantChercheur m) {
 		return memberService.addMember(m);

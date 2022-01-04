@@ -18,6 +18,8 @@ import com.example.demo.entities.PublicationMembreId;
 public interface MemberEvenementRepository extends JpaRepository<MembreEvenement, EvenementMembreId> {
 	@Query("select m from MembreEvenement m where participant_id=:x")
 	List<MembreEvenement> findEvenementByParticipantId(@Param("x") Long participantId);
+	@Query("select m from MembreEvenement m where evenement_id=:x")
+	List<MembreEvenement> findParticipantsOfEvenement(@Param("x") Long evenementId);
 	@Transactional
 	@Modifying
 	@Query(value = "DELETE from Membre_Evenement where participant_id=?1 and evenement_id=?2",nativeQuery = true)
