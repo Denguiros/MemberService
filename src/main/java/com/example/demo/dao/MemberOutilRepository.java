@@ -20,4 +20,6 @@ public interface MemberOutilRepository extends JpaRepository<MembreOutil, OutilM
 	@Modifying
 	@Query(value = "DELETE from Membre_Outil where membre_id=?1 and outil_id=?2",nativeQuery = true)
     void desaffecterMembreFromOutil(Long membreId,Long outilId);
+	@Query("select m from MembreOutil m where outil_id=:x")
+	List<MembreOutil> findMembreByOutilId(@Param("x") Long ouId);
 }

@@ -49,11 +49,15 @@ public interface IMemberService {
 
 	void desaffecterEtudiantDeEnseignant(Long idEtd);
 
-	void desaffecterAuteurFromPublication(Long id, Long pubId);
+	void desaffecterAuteurFromPublication(Long pubId);
 
 	void desaffecterParticipantFromEvenement(Long id, Long eveId);
 
 	void desaffecterMembreFromOutil(Long id, Long ouId);
 
 	List<Membre> getAllEvenetParticipants(Long id);
+
+	List<Membre> getAllPublicationCollabs(Long id);
+
+	Membre getOutilMember(Long ouId);
 }

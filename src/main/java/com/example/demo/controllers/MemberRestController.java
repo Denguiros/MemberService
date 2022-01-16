@@ -121,6 +121,11 @@ public class MemberRestController {
 	{
 		return memberService.getAllEvenetParticipants(id);
 	}
+	@GetMapping(value="/publicationCollabs/{id}")
+	public List<Membre> getAllPublicationCollabs(@PathVariable Long id)
+	{
+		return memberService.getAllPublicationCollabs(id);
+	}
 	@PostMapping(value = "/membres/enseignant")
 	public Membre addMembre(@RequestBody EnseignantChercheur m) {
 		return memberService.addMember(m);
@@ -134,9 +139,9 @@ public class MemberRestController {
 	public void affecterAuteurToPublication(@PathVariable Long id,@PathVariable Long pubId) {
 		memberService.affecterAuteurToPublication(id, pubId);
 	}
-	@PostMapping(value = "/membre/{id}/publication/{pubId}/desaffecter")
-	public void desaffecterAuteurToPublication(@PathVariable Long id,@PathVariable Long pubId) {
-		memberService.desaffecterAuteurFromPublication(id, pubId);
+	@PostMapping(value = "/membre/publication/{pubId}/desaffecter")
+	public void desaffecterAuteurToPublication(@PathVariable Long pubId) {
+		memberService.desaffecterAuteurFromPublication(pubId);
 	}
 	@PostMapping(value = "/membre/{id}/evenement/{eveId}")
 	public void affecterParticipantToEvenement(@PathVariable Long id,@PathVariable Long eveId) {
@@ -146,10 +151,16 @@ public class MemberRestController {
 	public void desaffecterParticipantToEvenement(@PathVariable Long id,@PathVariable Long eveId) {
 		memberService.desaffecterParticipantFromEvenement(id, eveId);
 	}
+	
 	@PostMapping(value = "/membre/{id}/outil/{ouId}")
 	public void affecterMembreToOutil(@PathVariable Long id,@PathVariable Long ouId) {
 		memberService.affecterMembreToOutil(id, ouId);
 	}
+	@GetMapping(value = "/outil/{ouId}")
+	public Membre getOutilMember(@PathVariable Long ouId) {
+		return memberService.getOutilMember(ouId);
+	}
+
 	@PostMapping(value = "/membre/{id}/outil/{ouId}/desaffecter")
 	public void desaffecterMembreFromOutil(@PathVariable Long id,@PathVariable Long ouId) {
 		memberService.desaffecterMembreFromOutil(id, ouId);

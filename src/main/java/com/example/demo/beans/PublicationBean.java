@@ -19,7 +19,6 @@ public class PublicationBean {
 	private String photo;
 	private String description;
 	private String lien;
-	@Temporal(TemporalType.DATE)
 	private Date date;
 	private String sourcePDF;
 }

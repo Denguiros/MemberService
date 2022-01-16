@@ -199,8 +199,12 @@ public class MemberImpl implements IMemberService {
 	}
 
 	@Override
-	public void desaffecterAuteurFromPublication(Long id, Long pubId) {
-		memberPublicationRepository.desaffecterAuteurFromPublication(id,pubId);
+	public void desaffecterAuteurFromPublication(Long pubId) {
+		List<MembrePublication> idPublications = memberPublicationRepository.findCollabsOfPublication(pubId);
+		idPublications.forEach(s -> {
+			memberPublicationRepository.desaffecterAuteurFromPublication(s.getId().getAuteurId(),pubId);
+		});
+		
 	}
 
 	@Override
@@ -218,9 +222,25 @@ public class MemberImpl implements IMemberService {
 		List<MembreEvenement> idEvents = memberEvenementRepository.findParticipantsOfEvenement(id);
 		List<Membre> membres = new ArrayList<Membre>();
 		idEvents.forEach(s -> {
-			System.out.println(s);
 			membres.add(memberRepository.findById(s.getId().getParticipantId()).get());
 		});
 		return membres;
 	}
+
+	@Override
+	public List<Membre> getAllPublicationCollabs(Long id) {
+		List<MembrePublication> idPublications = memberPublicationRepository.findCollabsOfPublication(id);
+		List<Membre> membres = new ArrayList<Membre>();
+		idPublications.forEach(s -> {
+			membres.add(memberRepository.findById(s.getId().getAuteurId()).get());
+		});
+		return membres;
+	}
+
+	@Override
+	public Membre getOutilMember(Long ouId) {
+		List<MembreOutil> IdOutils = memberOutilRepository.findMembreByOutilId(ouId);
+		return memberRepository.findById(IdOutils.get(0).getId().getMembreId()).get();
+	}
+	
 }

@@ -12,5 +12,7 @@ import lombok.NoArgsConstructor;
 public class OutilBean {
 	private long id;
 	private Date date;
-	private String source;
+	private String nom;
+	private boolean open;
+	private String codeSource;
 }
